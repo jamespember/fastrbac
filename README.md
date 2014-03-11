@@ -4,7 +4,7 @@ Access control system for Go inspired by GitHubs implementation - designed to be
 
 ## Interface types
 - Owner - Someone who has permissions on stuff
-- Entity - An object to have permissions on
+- Object - An object to have permissions on
 - Repository - Interface towards a database
 
 ## Data object types

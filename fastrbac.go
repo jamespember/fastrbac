@@ -16,13 +16,13 @@ type Role struct {
 	RoleTargetId int64
 }
 
-func HasPermission(repository Repository, owner Owner, entity Entity, access string) bool {
+func HasPermission(repository Repository, owner Owner, object Object, access string) bool {
 	// Owner always has full permission to the object
-	if entity.GetOwner() == owner.GetID() {
+	if object.GetOwner() == owner.GetID() {
 		return true
 	}
 
-	trust, _ := repository.GetTrust(owner, entity)
+	trust, _ := repository.GetTrust(owner, object)
 
 	if trust != nil {
 		for _, permission := range trust.Permissions {
@@ -35,12 +35,12 @@ func HasPermission(repository Repository, owner Owner, entity Entity, access str
 	return false
 }
 
-func GrantPermission(repository Repository, owner Owner, entity Entity, access string) error {
-	if HasPermission(repository, owner, entity, access) {
+func GrantPermission(repository Repository, owner Owner, object Object, access string) error {
+	if HasPermission(repository, owner, object, access) {
 		return nil
 	}
 
-	_, err := repository.AddPermission(owner, entity, access)
+	_, err := repository.AddPermission(owner, object, access)
 
 	return err
 }

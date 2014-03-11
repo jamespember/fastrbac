@@ -21,16 +21,16 @@ func NewDatastoreRepo(c appengine.Context) Repository {
 }
 
 // Generates the key for a trust
-func (this *datastoreRepository) createTrustKey(owner Owner, entity Entity) *datastore.Key {
-	keyString := fmt.Sprintf("%v_%v_%v_%v", owner.GetTypeName(), owner.GetID(), entity.GetTypeName(), entity.GetID())
+func (this *datastoreRepository) createTrustKey(owner Owner, object Object) *datastore.Key {
+	keyString := fmt.Sprintf("%v_%v_%v_%v", owner.GetTypeName(), owner.GetID(), object.GetTypeName(), object.GetID())
 	key := datastore.NewKey(this.Context, NAMESPACE_TRUST, keyString, 0, nil)
 	return key
 }
 
 // Fetches a trust, returns nil as trust if none exist
-func (this *datastoreRepository) GetTrust(owner Owner, entity Entity) (*Trust, error) {
+func (this *datastoreRepository) GetTrust(owner Owner, object Object) (*Trust, error) {
 	trust := new(Trust)
-	if err := datastore.Get(this.Context, this.createTrustKey(owner, entity), trust); err == datastore.ErrNoSuchEntity {
+	if err := datastore.Get(this.Context, this.createTrustKey(owner, object), trust); err == datastore.ErrNoSuchEntity {
 		return nil, nil
 	} else if err != nil {
 		return nil, err
@@ -40,16 +40,16 @@ func (this *datastoreRepository) GetTrust(owner Owner, entity Entity) (*Trust, e
 }
 
 // Add permission, append to existing trust or create a new one if one does not exist.
-func (this *datastoreRepository) AddPermission(owner Owner, entity Entity, access string) (*Trust, error) {
-	trust, _ := this.GetTrust(owner, entity)
+func (this *datastoreRepository) AddPermission(owner Owner, object Object, access string) (*Trust, error) {
+	trust, _ := this.GetTrust(owner, object)
 
 	if trust == nil {
 		// Create new trust
 		trust = &Trust{
 			HolderId:    owner.GetID(),
 			HolderType:  owner.GetTypeName(),
-			ObjectId:    entity.GetID(),
-			ObjectType:  entity.GetTypeName(),
+			ObjectId:    object.GetID(),
+			ObjectType:  object.GetTypeName(),
 			Permissions: []string{access},
 		}
 	} else {
@@ -57,7 +57,7 @@ func (this *datastoreRepository) AddPermission(owner Owner, entity Entity, acces
 		trust.Permissions = append(trust.Permissions, access)
 	}
 
-	if _, err := datastore.Put(this.Context, this.createTrustKey(owner, entity), trust); err != nil { // Allocate key
+	if _, err := datastore.Put(this.Context, this.createTrustKey(owner, object), trust); err != nil { // Allocate key
 		return nil, err
 	}
 
